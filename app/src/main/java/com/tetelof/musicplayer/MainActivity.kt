@@ -10,9 +10,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.provider.MediaStore
-import android.widget.ImageButton
-import android.widget.Toast
+import android.widget.*
 import java.io.File
 import java.io.IOException
 
@@ -23,103 +23,69 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val playButton = findViewById<ImageButton>(R.id.playButton)
-        val pauseButton = findViewById<ImageButton>(R.id.pauseButton)
-
-
-
-
-        val file =File("/storage/emulated/0/Musicas/TONY IGY - Astronomia.mp3")
-
-        playButton.setOnClickListener{
-            playContentUri(file.absolutePath)
+        // Important : handle the runtime permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // Check runtime permission to read external storage
         }
-        pauseButton.setOnClickListener{
-            pauseSound()
-        }
-    }
+        val button = findViewById<Button>(R.id.button)
+        val list_view = findViewById<ListView>(R.id.list_view)
 
-//    fun playSound(){
-//        if (mMediaPlayer == null){
-//            mMediaPlayer = MediaPlayer.create(this,R.raw.water)
-//            mMediaPlayer!!.isLooping = true
-//            mMediaPlayer!!.start()
-//        }else mMediaPlayer!!.start()
-//    }
+        // Button click listener
+        button.setOnClickListener {
+            // Get the external storage/sd card music files list
+            val list: MutableList<Music> = musicFiles()
 
-    private fun pauseSound(){
-        if (mMediaPlayer?.isPlaying == true) mMediaPlayer?.pause()
-    }
-
-//    fun stopSound(){
-//        if(mMediaPlayer != null){
-//            mMediaPlayer!!.stop()
-//            mMediaPlayer!!.release()
-//            mMediaPlayer = null
-//        }
-//    }
-
-    override fun onStop() {
-        super.onStop()
-        if(mMediaPlayer != null){
-            mMediaPlayer!!.release()
-            mMediaPlayer = null
-        }
-    }
-
-    private fun playContentUri(path : String){
-        mMediaPlayer = null
-        try {
-
-            mMediaPlayer = MediaPlayer().apply{
-                setDataSource(path)
-                setAudioAttributes(AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-                )
-                prepare()
-                start()
+            // Get the sd card music titles list
+            val titles = mutableListOf<String>()
+            for (music in list) {
+                titles.add(music.title)
             }
-            Toast.makeText(this, "Abrindo musica", Toast.LENGTH_SHORT).show()
-        }catch (e : IOException){
-            mMediaPlayer?.release()
-            mMediaPlayer = null
-            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-        }catch (e: Exception){
-            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-        }
-    }
 
-    fun getAllAudioFromDevice(context: Context){
-        val resolver: ContentResolver = contentResolver
-        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val cursor: Cursor? = resolver.query(uri, null, null, null, null)
-        when {
-            cursor == null -> {
-                Toast.makeText(this, "deu ruim", Toast.LENGTH_SHORT).show()
-            }
-            !cursor.moveToFirst() -> {
-                Toast.makeText(this, "Sem mídia no dispositivo", Toast.LENGTH_SHORT).show()
-            }
-            else -> {
-                val titleColumn: Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
-                val idColumn: Int = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
-                do {
-                    val thisId = cursor.getLong(idColumn)
-                    val thisTitle = cursor.getString(titleColumn)
-                    mediaPlayerSet(thisId)
-                } while (cursor.moveToNext())
-            }
+            // Display external storage music files list on list view
+            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, titles)
+            list_view.adapter = adapter
         }
-        cursor?.close()
     }
-    fun mediaPlayerSet(id : Long){
-        val contentUri : Uri = ContentUris.withAppendedId(
-            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,id)
-        val mediaPlayer = MediaPlayer().apply {
-            setAudioStreamType(AudioManager.STREAM_MUSIC)
-            setDataSource(applicationContext, contentUri)
+    fun musicFiles():MutableList<Music>{
+        // Initialize an empty mutable list of music
+        val list:MutableList<Music> = mutableListOf()
+
+        // Get the external storage media store audio uri
+        val uri: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        //val uri: Uri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI
+
+        // IS_MUSIC : Non-zero if the audio file is music
+        val selection = MediaStore.Audio.Media.IS_MUSIC + "!= 0"
+
+        // Sort the musics
+        val sortOrder = MediaStore.Audio.Media.TITLE + " ASC"
+        //val sortOrder = MediaStore.Audio.Media.TITLE + " DESC"
+
+        // Query the external storage for music files
+        val cursor: Cursor? = this.contentResolver.query(
+            uri, // Uri
+            null, // Projection
+            selection, // Selection
+            null, // Selection arguments
+            sortOrder // Sort order
+        )
+
+        // If query result is not empty
+        if (cursor!= null && cursor.moveToFirst()){
+            val id:Int = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
+            val title:Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+
+            // Now loop through the music files
+            do {
+                val audioId:Long = cursor.getLong(id)
+                val audioTitle:String = cursor.getString(title)
+
+                // Add the current music to the list
+                list.add(Music(audioId,audioTitle))
+            }while (cursor.moveToNext())
         }
+
+        // Finally, return the music files list
+        return  list
     }
 }
