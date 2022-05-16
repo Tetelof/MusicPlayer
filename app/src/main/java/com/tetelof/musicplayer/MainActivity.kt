@@ -1,9 +1,16 @@
 package com.tetelof.musicplayer
 
+import android.content.ContentResolver
+import android.content.ContentUris
+import android.content.Context
+import android.database.Cursor
 import android.media.AudioAttributes
+import android.media.AudioManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.media.MediaPlayer
+import android.net.Uri
+import android.provider.MediaStore
 import android.widget.ImageButton
 import android.widget.Toast
 import java.io.File
@@ -18,6 +25,8 @@ class MainActivity : AppCompatActivity() {
 
         val playButton = findViewById<ImageButton>(R.id.playButton)
         val pauseButton = findViewById<ImageButton>(R.id.pauseButton)
+
+
 
 
         val file =File("/storage/emulated/0/Musicas/TONY IGY - Astronomia.mp3")
@@ -79,6 +88,38 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
         }catch (e: Exception){
             Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun getAllAudioFromDevice(context: Context){
+        val resolver: ContentResolver = contentResolver
+        val uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        val cursor: Cursor? = resolver.query(uri, null, null, null, null)
+        when {
+            cursor == null -> {
+                Toast.makeText(this, "deu ruim", Toast.LENGTH_SHORT).show()
+            }
+            !cursor.moveToFirst() -> {
+                Toast.makeText(this, "Sem mídia no dispositivo", Toast.LENGTH_SHORT).show()
+            }
+            else -> {
+                val titleColumn: Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+                val idColumn: Int = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
+                do {
+                    val thisId = cursor.getLong(idColumn)
+                    val thisTitle = cursor.getString(titleColumn)
+                    mediaPlayerSet(thisId)
+                } while (cursor.moveToNext())
+            }
+        }
+        cursor?.close()
+    }
+    fun mediaPlayerSet(id : Long){
+        val contentUri : Uri = ContentUris.withAppendedId(
+            MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,id)
+        val mediaPlayer = MediaPlayer().apply {
+            setAudioStreamType(AudioManager.STREAM_MUSIC)
+            setDataSource(applicationContext, contentUri)
         }
     }
 }
