@@ -1,20 +1,16 @@
 package com.tetelof.musicplayer
 
-import android.content.ContentResolver
 import android.content.ContentUris
-import android.content.Context
 import android.database.Cursor
-import android.media.AudioAttributes
-import android.media.AudioManager
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.*
-import java.io.File
-import java.io.IOException
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.ListView
+import androidx.appcompat.app.AppCompatActivity
 
 var mMediaPlayer: MediaPlayer? = null
 
@@ -74,14 +70,17 @@ class MainActivity : AppCompatActivity() {
         if (cursor!= null && cursor.moveToFirst()){
             val id:Int = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
             val title:Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            val path = ContentUris
+                .withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursor.getLong(id))
 
             // Now loop through the music files
             do {
                 val audioId:Long = cursor.getLong(id)
                 val audioTitle:String = cursor.getString(title)
+                val audioPath: Uri = path
 
                 // Add the current music to the list
-                list.add(Music(audioId,audioTitle))
+                list.add(Music(audioId,audioTitle,audioPath))
             }while (cursor.moveToNext())
         }
 
