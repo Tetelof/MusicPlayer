@@ -4,7 +4,6 @@ import android.content.ContentUris
 import android.database.Cursor
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.widget.ArrayAdapter
@@ -19,12 +18,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Important : handle the runtime permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Check runtime permission to read external storage
-        }
+
         val button = findViewById<Button>(R.id.button)
-        val list_view = findViewById<ListView>(R.id.list_view)
+        val listView = findViewById<ListView>(R.id.list_view)
 
         // Button click listener
         button.setOnClickListener {
@@ -39,10 +35,10 @@ class MainActivity : AppCompatActivity() {
 
             // Display external storage music files list on list view
             val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, titles)
-            list_view.adapter = adapter
+            listView.adapter = adapter
         }
     }
-    fun musicFiles():MutableList<Music>{
+    private fun musicFiles():MutableList<Music>{
         // Initialize an empty mutable list of music
         val list:MutableList<Music> = mutableListOf()
 
@@ -85,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Finally, return the music files list
+        cursor?.close()
         return  list
     }
 }
