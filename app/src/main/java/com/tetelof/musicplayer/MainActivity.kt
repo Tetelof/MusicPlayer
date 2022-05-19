@@ -5,7 +5,9 @@ import android.database.Cursor
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.MediaStore
+import android.provider.Settings
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ListView
@@ -18,6 +20,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
 
         val button = findViewById<Button>(R.id.button)
         val listView = findViewById<ListView>(R.id.list_view)
