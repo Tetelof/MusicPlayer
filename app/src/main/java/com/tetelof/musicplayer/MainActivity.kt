@@ -76,6 +76,7 @@ class MainActivity : AppCompatActivity() {
         if (cursor!= null && cursor.moveToFirst()){
             val id:Int = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
             val title:Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            val artist: String = cursor.getColumnIndex(MediaStore.Audio.ARTIST)
             val path = ContentUris
                 .withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursor.getLong(id))
 
@@ -84,9 +85,10 @@ class MainActivity : AppCompatActivity() {
                 val audioId:Long = cursor.getLong(id)
                 val audioTitle:String = cursor.getString(title)
                 val audioPath: Uri = path
+                val audioArtist: String = artist
 
                 // Add the current music to the list
-                list.add(Music(audioId,audioTitle,audioPath))
+                list.add(Music(audioId,audioTitle,audioArtist,audioPath))
             }while (cursor.moveToNext())
         }
 
