@@ -13,9 +13,15 @@ import android.widget.Button
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 
-var mMediaPlayer: MediaPlayer? = null
+
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var runnable: Runnable
+    private var handler = Handler()
+    private var pause: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -25,8 +31,9 @@ class MainActivity : AppCompatActivity() {
         val button = findViewById<Button>(R.id.button)
         val listView = findViewById<ListView>(R.id.list_view)
 
-        // Button click listener
-        button.setOnClickListener {
+
+        button.setOnClickListener{
+            
             // Get the external storage/sd card music files list
             val list: MutableList<Music> = musicFiles()
 
@@ -86,5 +93,42 @@ class MainActivity : AppCompatActivity() {
         // Finally, return the music files list
         cursor?.close()
         return  list
+    }
+    public fun playContentUri(path : String){
+        mMediaPlayer = null
+        try {
+
+            mMediaPlayer = MediaPlayer().apply{
+                setDataSource(path)
+                setAudioAttributes(AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build()
+                )
+                prepare()
+                start()
+            }
+            Toast.makeText(this, "Abrindo musica", Toast.LENGTH_SHORT).show()
+        }catch (e : IOException){
+            mMediaPlayer?.release()
+            mMediaPlayer = null
+            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+        }catch (e: Exception){
+            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+    override fun onStop() {
+        super.onStop()
+        if(mMediaPlayer != null){
+            mMediaPlayer!!.release()
+            mMediaPlayer = null
+        }
+    }
+    fun stopSound(){
+        if(mMediaPlayer != null){
+            mMediaPlayer!!.stop()
+            mMediaPlayer!!.release()
+            mMediaPlayer = null
+        }
     }
 }
