@@ -1,52 +1,43 @@
 package com.tetelof.musicplayer
 
-import android.content.ContentUris
+import android.Manifest
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
-import android.provider.Settings
-import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var mediaPlayer: MediaPlayer
-    private lateinit var runnable: Runnable
-    private var handler = Handler()
-    private var pause: Boolean = false
+
+    private var mMediaPlayer: MediaPlayer? = null
+    private lateinit var musicRecyclerView: RecyclerView
+    private lateinit var musicList: MutableList<Music>
+    private lateinit var adapter: MusicAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION
-
-        val button = findViewById<Button>(R.id.button)
-        val listView = findViewById<ListView>(R.id.list_view)
-
-
-        button.setOnClickListener{
-            
-            // Get the external storage/sd card music files list
-            val list: MutableList<Music> = musicFiles()
-
-            // Get the sd card music titles list
-            val titles = mutableListOf<String>()
-            for (music in list) {
-                titles.add(music.title)
-            }
-
-            // Display external storage music files list on list view
-            val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, titles)
-            listView.adapter = adapter
+        if (!havePermission()) {
+            requestForSpecificPermission()
         }
+        musicList = mutableListOf()
+        musicList = musicFiles()
+        adapter = MusicAdapter(this, musicList)
+
+        musicRecyclerView = findViewById(R.id.musicRecyclerView)
+        musicRecyclerView.layoutManager = LinearLayoutManager(this)
+        musicRecyclerView.adapter = adapter
+
     }
     private fun musicFiles():MutableList<Music>{
         // Initialize an empty mutable list of music
@@ -76,16 +67,18 @@ class MainActivity : AppCompatActivity() {
         if (cursor!= null && cursor.moveToFirst()){
             val id:Int = cursor.getColumnIndex(MediaStore.Audio.Media._ID)
             val title:Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
-            val artist: String = cursor.getColumnIndex(MediaStore.Audio.ARTIST)
-            val path = ContentUris
-                .withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, cursor.getLong(id))
+            val artist: Int = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
 
             // Now loop through the music files
             do {
                 val audioId:Long = cursor.getLong(id)
                 val audioTitle:String = cursor.getString(title)
-                val audioPath: Uri = path
-                val audioArtist: String = artist
+                val audioPath: Uri = Uri
+                    .withAppendedPath(
+                        MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                        "" + cursor.getLong(id)
+                    )
+                val audioArtist: String = cursor.getString(artist)
 
                 // Add the current music to the list
                 list.add(Music(audioId,audioTitle,audioArtist,audioPath))
@@ -96,29 +89,6 @@ class MainActivity : AppCompatActivity() {
         cursor?.close()
         return  list
     }
-    public fun playContentUri(path : String){
-        mMediaPlayer = null
-        try {
-
-            mMediaPlayer = MediaPlayer().apply{
-                setDataSource(path)
-                setAudioAttributes(AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-                )
-                prepare()
-                start()
-            }
-            Toast.makeText(this, "Abrindo musica", Toast.LENGTH_SHORT).show()
-        }catch (e : IOException){
-            mMediaPlayer?.release()
-            mMediaPlayer = null
-            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-        }catch (e: Exception){
-            Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
-        }
-    }
     override fun onStop() {
         super.onStop()
         if(mMediaPlayer != null){
@@ -126,11 +96,18 @@ class MainActivity : AppCompatActivity() {
             mMediaPlayer = null
         }
     }
-    fun stopSound(){
-        if(mMediaPlayer != null){
-            mMediaPlayer!!.stop()
-            mMediaPlayer!!.release()
-            mMediaPlayer = null
-        }
+    private fun havePermission(): Boolean {
+        val result = ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
+        return result == PackageManager.PERMISSION_GRANTED
+    }
+    private fun requestForSpecificPermission() {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ),
+            101
+        )
     }
 }
