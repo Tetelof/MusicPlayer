@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:text="Track Name"
         android:layout_toRightOf="@+id/miniAlbumCover"
-        android:layout_toLeftOf="@+id/playButton"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
         android:textSize="15sp"/>
@@ -27,17 +26,10 @@
         android:layout_height="wrap_content"
         android:text="Artist"
         android:layout_toRightOf="@+id/miniAlbumCover"
-        android:layout_toLeftOf="@+id/playButton"
         android:layout_below="@+id/musicName"
         android:layout_marginLeft="10dp"
         android:textSize="10sp"/>
 
-    <ImageButton
-        android:id="@+id/stopButton"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="5dp"/>
+
 
 </RelativeLayout>

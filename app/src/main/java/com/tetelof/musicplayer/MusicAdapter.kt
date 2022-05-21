@@ -26,18 +26,14 @@ class MusicAdapter(private val context: Context, private val musicList: MutableL
     override fun onBindViewHolder(holder: MusicViewHolder, position: Int) {
         val music = musicList[position]
         holder.musicName.text = music.title
-        holder.musicAuthor.text = music.author
+        holder.musicAuthor.text = music.artist
+
 
         holder.itemView.setOnClickListener{
-            if (mMediaPlayer != null && mMediaPlayer!!.isPlaying){
-                stopSound()
-            }
-
-            playContentUri(music.path)
-
+            Music.playContentUri(music.path, context)
         }
         holder.stopButton.setOnClickListener{
-            stopSound()
+            Music.stopSound()
         }
     }
 
@@ -47,37 +43,5 @@ class MusicAdapter(private val context: Context, private val musicList: MutableL
         val musicName: TextView = itemView.findViewById(R.id.musicName)
         val musicAuthor: TextView = itemView.findViewById(R.id.musicAuthor)
         val stopButton: ImageView = itemView.findViewById(R.id.stopButton)
-    }
-    private fun playContentUri(path : Uri){
-        mMediaPlayer = null
-        try {
-
-            mMediaPlayer = MediaPlayer().apply{
-                setDataSource(context, path)
-                setAudioAttributes(
-                    AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_MEDIA)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                    .build()
-                )
-                prepare()
-                start()
-            }
-            Toast.makeText(context, "Abrindo musica", Toast.LENGTH_SHORT).show()
-        }catch (e : IOException){
-            mMediaPlayer?.release()
-            mMediaPlayer = null
-            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-        }catch (e: Exception){
-            Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
-        }
-    }
-    private
-    fun stopSound(){
-        if(mMediaPlayer != null){
-            mMediaPlayer!!.stop()
-            mMediaPlayer!!.release()
-            mMediaPlayer = null
-        }
     }
 }

@@ -21,11 +21,47 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:layout_alignParentBottom="true">
+        <ImageView
+            android:id="@+id/miniAlbumCover"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginVertical="5dp"
+            android:layout_centerVertical="true"/>
+
+        <TextView
+            android:id="@+id/musicName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Track Name"
+            android:layout_toRightOf="@+id/miniAlbumCover"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="10dp"
+            android:textSize="15sp"/>
+
+        <TextView
+            android:id="@+id/musicAuthor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Artist"
+            android:layout_toRightOf="@+id/miniAlbumCover"
+            android:layout_below="@+id/musicName"
+            android:layout_marginLeft="10dp"
+            android:textSize="10sp"/>
         <ImageButton
+            android:id="@+id/stopButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:layout_margin="10dp"/>
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_outline_stop_circle_50"/>
+        <ImageButton
+            android:id="@+id/play_pauseButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_toLeftOf="@id/stopButton"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_baseline_play_circle_outline_50"/>
+
     </RelativeLayout>
 </RelativeLayout>

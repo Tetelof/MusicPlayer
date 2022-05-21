@@ -3,16 +3,26 @@ package com.tetelof.musicplayer
 import android.Manifest
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import android.widget.LinearLayout
+
+import android.R
+
+import android.graphics.Bitmap
+
+import android.media.MediaMetadataRetriever
+
+
+
 
 
 class MainActivity : AppCompatActivity() {
@@ -69,9 +79,11 @@ class MainActivity : AppCompatActivity() {
             val title:Int = cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
             val artist: Int = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
 
+            val mmr = MediaMetadataRetriever()
+
             // Now loop through the music files
             do {
-                val audioId:Long = cursor.getLong(id)
+                val audioId:Int = cursor.getInt(id)
                 val audioTitle:String = cursor.getString(title)
                 val audioPath: Uri = Uri
                     .withAppendedPath(
@@ -80,8 +92,16 @@ class MainActivity : AppCompatActivity() {
                     )
                 val audioArtist: String = cursor.getString(artist)
 
+                mmr.setDataSource()
+
+                val data = mmr.embeddedPicture
+                if (data != null) {
+                    val bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+                } else {
+                }
+
                 // Add the current music to the list
-                list.add(Music(audioId,audioTitle,audioArtist,audioPath))
+                list.add(Music(audioId,audioTitle,audioArtist,audioPath,audioCover))
             }while (cursor.moveToNext())
         }
 
