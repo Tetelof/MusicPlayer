@@ -1,7 +1,7 @@
 package com.tetelof.musicplayer
 
-import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.media.MediaMetadataRetriever
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +9,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MusicAdapter(private val context: MainActivity, private val musicList: MutableList<Music>) :
     RecyclerView.Adapter<MusicAdapter.MusicViewHolder>() {
@@ -23,14 +27,17 @@ class MusicAdapter(private val context: MainActivity, private val musicList: Mut
         val music = musicList[position]
         holder.musicName.text = music.title
         holder.musicAuthor.text = music.artist
-        changeCover(music)
-        holder.miniAlbumCover.setImageBitmap(music.cover)
-
-
-
+        GlobalScope.launch {
+            changeCover(music)
+            withContext(Dispatchers.Main){
+                holder.miniAlbumCover.setImageBitmap(music.cover)
+            }
+        }
         holder.itemView.setOnClickListener{
-            Music.playContentUri(music, context)
-            context.playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
+            Playlist.clearPlaylist()
+            Playlist.createFromMusic(music,musicList)
+            Playlist.startPlaylist(context)
+
         }
     }
 
@@ -42,14 +49,14 @@ class MusicAdapter(private val context: MainActivity, private val musicList: Mut
         val miniAlbumCover: ImageView = itemView.findViewById(R.id.miniAlbumCover)
     }
 
-    fun changeCover(music: Music){
+    private fun changeCover(music: Music){
         val mmr = MediaMetadataRetriever()
         mmr.setDataSource(context,music.path)
-        val data = mmr.embeddedPicture
-
-        if(data != null){
+        if (mmr.embeddedPicture != null){
+            val data: ByteArray = mmr.embeddedPicture!!
             music.cover = BitmapFactory.decodeByteArray(data, 0, data.size)
+        }else{
+            music.cover = BitmapFactory.decodeResource(context.resources, R.drawable.cover)
         }
-
     }
 }

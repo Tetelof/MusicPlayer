@@ -2,11 +2,9 @@ package com.tetelof.musicplayer
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
-import android.widget.ImageButton
 import android.widget.Toast
 import java.io.IOException
 
@@ -15,29 +13,25 @@ class Music {
     var title: String
     var artist: String
     var path: Uri
-    var cover: Bitmap
+    var cover: Bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
 
-    constructor(id: Int, title: String, artist: String, path: Uri, audioCover: Bitmap){
+    constructor(id: Int, title: String, artist: String, path: Uri, cover: Bitmap){
         this.id = id
         this.title = title
         this.artist = artist
         this.path = path
-        this.cover = audioCover
+        this.cover = cover
     }
 
     companion object MusicPlayer{
         var mediaPlayer: MediaPlayer? = null
-        var title: String = ""
-        var artist: String = ""
-        var path: Uri = Uri.EMPTY
-        var cover = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
-
+        var currentPlaying: Music? = null
+        var loop: Boolean = true
 
         fun playContentUri(music : Music, context: Context){
-            this.title = music.title
-            this.artist = music.artist
-            this.path = music.path
-            this.cover = music.cover
+            this.currentPlaying = music
+
+
 
             if (mediaPlayer != null && mediaPlayer!!.isPlaying){
                 stopSound()
@@ -45,7 +39,7 @@ class Music {
             try {
 
                 mediaPlayer = MediaPlayer().apply{
-                    setDataSource(context, path)
+                    setDataSource(context, currentPlaying!!.path)
                     setAudioAttributes(
                         AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_MEDIA)

@@ -16,53 +16,58 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/player"
         />
+
     <RelativeLayout
         android:id="@+id/player"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentBottom="true">
+
         <ImageView
             android:id="@+id/mainAlbumCover"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_centerVertical="true"
             android:layout_marginVertical="5dp"
             android:layout_marginLeft="5dp"
-            android:layout_centerVertical="true"/>
+            android:src="@drawable/cover"/>
 
         <TextView
             android:id="@+id/mainMusicName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Track Name"
-            android:layout_toRightOf="@+id/mainAlbumCover"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="10dp"
-            android:textSize="15sp"/>
+            android:layout_toRightOf="@+id/mainAlbumCover"
+            android:text="Track Name"
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/mainMusicAuthor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Artist"
-            android:layout_toRightOf="@+id/mainAlbumCover"
             android:layout_below="@+id/mainMusicName"
             android:layout_marginLeft="10dp"
-            android:textSize="10sp"/>
+            android:layout_toRightOf="@+id/mainAlbumCover"
+            android:text="Artist"
+            android:textSize="10sp" />
+
         <ImageButton
             android:id="@+id/mainStopButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_margin="10dp"
-            android:src="@drawable/ic_outline_stop_circle_50"/>
+            android:src="@drawable/ic_outline_stop_circle_50" />
+
         <ImageButton
             android:id="@+id/mainPlayPauseButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_toLeftOf="@id/mainStopButton"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_baseline_play_circle_outline_50"/>
+            android:layout_toLeftOf="@id/mainStopButton"
+            android:src="@drawable/ic_baseline_play_circle_outline_50" />
 
     </RelativeLayout>
 </RelativeLayout>

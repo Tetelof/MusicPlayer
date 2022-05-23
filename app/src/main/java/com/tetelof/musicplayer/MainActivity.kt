@@ -1,8 +1,10 @@
 package com.tetelof.musicplayer
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.Image
 import android.media.MediaMetadataRetriever
@@ -16,10 +18,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 
@@ -30,11 +29,12 @@ class MainActivity : AppCompatActivity(){
     private lateinit var musicRecyclerView: RecyclerView
     private lateinit var musicList: MutableList<Music>
     private lateinit var adapter: MusicAdapter
-    private lateinit var musicImage: ImageView
-    public lateinit var playPauseButton: ImageButton
+    lateinit var musicImage: ImageView
+    lateinit var playPauseButton: ImageButton
     private lateinit var stopButton: ImageButton
-    private lateinit var musicTitle: TextView
-    private lateinit var musicArtist: TextView
+    lateinit var musicTitle: TextView
+    lateinit var musicArtist: TextView
+    private lateinit var player: RelativeLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +45,7 @@ class MainActivity : AppCompatActivity(){
         }
         musicList = mutableListOf()
         musicList = musicFiles()
+        Playlist.createPlaylist(musicList)
         adapter = MusicAdapter(this, musicList)
 
         musicRecyclerView = findViewById(R.id.musicRecyclerView)
@@ -56,10 +57,12 @@ class MainActivity : AppCompatActivity(){
         musicArtist = findViewById(R.id.mainMusicAuthor)
         playPauseButton = findViewById(R.id.mainPlayPauseButton)
         stopButton = findViewById(R.id.mainStopButton)
+        player = findViewById(R.id.player)
 
-        musicImage.setImageBitmap(Music.cover)
-        musicTitle.text = Music.title
-        musicArtist.text = Music.artist
+        player.setOnClickListener{
+            val intent = Intent(this, Player::class.java)
+            startActivity(intent)
+        }
         stopButton.setOnClickListener{
             Music.stopSound()
             playPauseButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_50)
@@ -74,7 +77,8 @@ class MainActivity : AppCompatActivity(){
                 Music.resumeSound()
                 playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
             }else{
-                Toast.makeText(this, "Nenhuma música carregada no player.", Toast.LENGTH_SHORT).show()
+                Playlist.startPlaylist(this)
+                playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
             }
         }
 
@@ -105,8 +109,7 @@ class MainActivity : AppCompatActivity(){
                         "" + cursor.getLong(id)
                     )
                 val audioArtist: String = cursor.getString(artist)
-                val vinylCover = this.resources.openRawResource(R.raw.vinyl)
-                val audioCover = BitmapFactory.decodeStream(vinylCover)
+                val audioCover = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
                 list.add(Music(audioId, audioTitle, audioArtist, audioPath, audioCover))
             }while (cursor.moveToNext())
         }
@@ -140,4 +143,6 @@ class MainActivity : AppCompatActivity(){
             101
         )
     }
+
+
 }
