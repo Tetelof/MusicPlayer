@@ -43,9 +43,7 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
                     atualizaInfo(music, context)
 //                    Toast.makeText(context, "Abrindo musica", Toast.LENGTH_SHORT).show()
                 }
-                mediaPlayer!!.setOnCompletionListener {
-                    Playlist.nextMusic(music, context)
-                }
+
             }catch (e : IOException){
                 mediaPlayer?.release()
                 mediaPlayer = null
