@@ -1,15 +1,21 @@
 package com.tetelof.musicplayer
 
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.widget.*
-import android.os.Handler as Handler
+import androidx.appcompat.app.AppCompatActivity
 
 class Player : AppCompatActivity() {
+    lateinit var musicTitle: TextView
+    lateinit var musicArtist: TextView
+    lateinit var musicImage: ImageView
+    lateinit var playPauseButton: ImageButton
+    lateinit var nextButton: ImageButton
+    lateinit var previousButton: ImageButton
+    lateinit var seekbar: SeekBar
+    lateinit var duracao: TextView
 
-    lateinit var runnable: Runnable
+    private lateinit var runnable: Runnable
     private var handler = Handler()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,30 +23,30 @@ class Player : AppCompatActivity() {
 
         // timers da musica
         val tempoAtual: TextView = findViewById(R.id.playerTempoAtual)
-        val duração: TextView = findViewById(R.id.playerDuracao)
+        duracao= findViewById(R.id.playerDuracao)
 
 
         // define tamanho da seekbar e o timer de duração
-        val seekbar: SeekBar = findViewById(R.id.playerSeekBar)
+        seekbar= findViewById(R.id.playerSeekBar)
         seekbar.progress = 0
         if(Music.mediaPlayer!=null) {
             seekbar.max = Music.mediaPlayer!!.duration
-            duração.text = millToMinutes(Music.mediaPlayer!!.duration)
+            duracao.text = millToMinutes(Music.mediaPlayer!!.duration)
         }
         else seekbar.max = 1
 
 
         // atualiza os nomes de artista e da musica e atualiza a imagem de cover
-        val musicTile = findViewById<TextView>(R.id.playerMusicTitle)
-        val musicArtist = findViewById<TextView>(R.id.playerMusicArtist)
-        val cover = findViewById<ImageView>(R.id.playerCover)
-        musicTile.text = Music.currentPlaying!!.title
+        musicTitle = findViewById(R.id.playerMusicTitle)
+        musicArtist = findViewById(R.id.playerMusicArtist)
+        musicImage = findViewById(R.id.playerCover)
+        musicTitle.text = Music.currentPlaying!!.title
         musicArtist.text = Music.currentPlaying!!.artist
-        if (Music.currentPlaying!!.cover != null) cover.setImageBitmap(Music.currentPlaying!!.cover)
+        musicImage.setImageBitmap(Music.currentPlaying!!.cover)
 
 
         // botao de play/pause
-        val playPauseButton = findViewById<ImageButton>(R.id.playerPlayPauseButton)
+        playPauseButton = findViewById(R.id.playerPlayPauseButton)
         if(Music.mediaPlayer != null && Music.mediaPlayer!!.isPlaying) {
             playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
         }else{
@@ -59,6 +65,19 @@ class Player : AppCompatActivity() {
               }else{
                   Toast.makeText(this, "Nenhuma musica carregada no player.", Toast.LENGTH_SHORT).show()
               }
+        }
+
+
+        // botão de next
+        nextButton = findViewById(R.id.playerNextButton)
+        nextButton.setOnClickListener{
+            Playlist.nextMusic(Music.currentPlaying!!, this)
+        }
+
+        //botão previous
+        previousButton = findViewById(R.id.playerPreviousButton)
+        previousButton.setOnClickListener{
+            Playlist.previousMusic(Music.currentPlaying!!, this)
         }
 
 
@@ -84,11 +103,11 @@ class Player : AppCompatActivity() {
         if(Music.mediaPlayer != null)Music.mediaPlayer!!.setOnCompletionListener {
             playPauseButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_50)
             seekbar.progress = 0
-            Playlist.nextMusic(Music.currentPlaying!!,)
+
         }
     }
 
-    private fun millToMinutes(milliseconds: Int): String{
+    fun millToMinutes(milliseconds: Int): String{
         val minutes = milliseconds / 1000 / 60
         val seconds = milliseconds / 1000 % 60
         return String.format("%02d:%02d",minutes,seconds)

@@ -6,10 +6,10 @@ import android.widget.Toast
 class Playlist
 {
     companion object {
-        val playlist: MutableList<Music> = mutableListOf()
+        private val playlist: MutableList<Music> = mutableListOf()
 
 
-        fun nextMusic(atual: Music, context: MainActivity) {
+        fun nextMusic(atual: Music, context: Context) {
             try {
                 Music.playContentUri(playlist[playlist.indexOf(atual) + 1], context)
             } catch (e: Exception) {
@@ -19,7 +19,7 @@ class Playlist
             }
         }
 
-        fun previousMusic(atual: Music, context: MainActivity) {
+        fun previousMusic(atual: Music, context: Context) {
             try {
                 Music.playContentUri(playlist[playlist.indexOf(atual) - 1], context)
             } catch (e: Exception) {
@@ -34,7 +34,7 @@ class Playlist
         }
         fun createFromMusic(music: Music, musicFiles: MutableList<Music>){
             val index = musicFiles.indexOf(music)
-            for(i in index..musicFiles.size-1){
+            for(i in index until musicFiles.size-1){
                 playlist.add(musicFiles[i])
             }
             for(j in 0..index){
@@ -42,7 +42,7 @@ class Playlist
             }
         }
 
-        fun startPlaylist(context: MainActivity) {
+        fun startPlaylist(context: Context) {
             Music.playContentUri(playlist[0], context)
         }
 

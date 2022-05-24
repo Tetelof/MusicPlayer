@@ -8,25 +8,14 @@ import android.net.Uri
 import android.widget.Toast
 import java.io.IOException
 
-class Music {
-    var id: Int = 0
-    var title: String
-    var artist: String
-    var path: Uri
-    var cover: Bitmap = Bitmap.createBitmap(50, 50, Bitmap.Config.ARGB_8888)
-
-    constructor(id: Int, title: String, artist: String, path: Uri, cover: Bitmap){
-        this.id = id
-        this.title = title
-        this.artist = artist
-        this.path = path
-        this.cover = cover
-    }
+class Music(var title: String, var artist: String, var path: Uri, var cover: Bitmap) {
 
     companion object MusicPlayer{
         var mediaPlayer: MediaPlayer? = null
         var currentPlaying: Music? = null
         var loop: Boolean = true
+
+
 
         fun playContentUri(music : Music, context: Context){
             this.currentPlaying = music
@@ -51,7 +40,11 @@ class Music {
                 }
                 mediaPlayer!!.setOnPreparedListener{
                     mediaPlayer!!.start()
-                    Toast.makeText(context, "Abrindo musica", Toast.LENGTH_SHORT).show()
+                    atualizaInfo(music, context)
+//                    Toast.makeText(context, "Abrindo musica", Toast.LENGTH_SHORT).show()
+                }
+                mediaPlayer!!.setOnCompletionListener {
+                    Playlist.nextMusic(music, context)
                 }
             }catch (e : IOException){
                 mediaPlayer?.release()
@@ -77,6 +70,24 @@ class Music {
             if (mediaPlayer != null && !mediaPlayer!!.isPlaying){
                 mediaPlayer!!.start()
             }
+        }
+        fun atualizaInfo(music: Music, context: Context){
+            try {
+                context as MainActivity
+                context.musicArtist.text = music.artist
+                context.musicTitle.text = music.title
+                context.musicImage.setImageBitmap(music.cover)
+                context.playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
+            }catch (e: Exception){}
+            try {
+                context as Player
+                context.musicArtist.text = music.artist
+                context.musicTitle.text = music.title
+                context.musicImage.setImageBitmap(music.cover)
+                context.playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
+                context.seekbar.max = mediaPlayer!!.duration
+                context.duracao.text = context.millToMinutes(mediaPlayer!!.duration)
+            }catch (e: Exception) {}
         }
     }
 }
