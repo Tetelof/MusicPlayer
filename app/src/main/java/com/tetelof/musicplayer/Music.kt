@@ -44,12 +44,16 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
 //                    Toast.makeText(context, "Abrindo musica", Toast.LENGTH_SHORT).show()
                 }
 
+
             }catch (e : IOException){
                 mediaPlayer?.release()
                 mediaPlayer = null
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
             }catch (e: Exception){
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
+            }
+            mediaPlayer!!.setOnCompletionListener {
+                Playlist.nextMusic(currentPlaying!!, context)
             }
         }
         fun stopSound() {
@@ -87,5 +91,6 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
                 context.duracao.text = context.millToMinutes(mediaPlayer!!.duration)
             }catch (e: Exception) {}
         }
+
     }
 }

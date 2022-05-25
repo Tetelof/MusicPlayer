@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -14,6 +16,7 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
@@ -58,26 +61,46 @@ class MainActivity : AppCompatActivity(){
         stopButton = findViewById(R.id.mainStopButton)
         player = findViewById(R.id.player)
 
-        player.setOnClickListener{
+        player.setOnClickListener {
             val intent = Intent(this, Player::class.java)
             startActivity(intent)
         }
-        stopButton.setOnClickListener{
+        stopButton.setOnClickListener {
             Music.stopSound()
             playPauseButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_50)
         }
 
 
-        playPauseButton.setOnClickListener{
-            if (Music.mediaPlayer != null && Music.mediaPlayer!!.isPlaying){
+        playPauseButton.setOnClickListener {
+            if (Music.mediaPlayer != null && Music.mediaPlayer!!.isPlaying) {
                 Music.pauseSound()
                 playPauseButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_50)
-            }else if(Music.mediaPlayer != null && !Music.mediaPlayer!!.isPlaying){
+            } else if (Music.mediaPlayer != null && !Music.mediaPlayer!!.isPlaying) {
                 Music.resumeSound()
                 playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
-            }else{
+            } else {
                 Playlist.startPlaylist(this)
                 playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
+            }
+        }
+
+
+        val searchItem = findViewById<EditText>(R.id.searchBox)
+        searchItem.addTextChangedListener {
+            if (searchItem.text.toString().isNotEmpty()) {
+                displayList.clear()
+                val search = searchItem.text.toString().lowercase()
+                musicList.forEach {
+                    if (it.title.lowercase().contains(search) ||
+                            it.artist.lowercase().contains(search)) {
+                        displayList.add(it)
+                    }
+                }
+                musicRecyclerView.adapter!!.notifyDataSetChanged()
+            } else {
+                displayList.clear()
+                displayList.addAll(musicList)
+                musicRecyclerView.adapter!!.notifyDataSetChanged()
             }
         }
     }
@@ -139,67 +162,15 @@ class MainActivity : AppCompatActivity(){
         )
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.options_menu, menu)
-        val searchItem = menu.findItem(R.id.search)
-        if(searchItem != null){
-            val searchView = searchItem.actionView as SearchView
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-                override fun onQueryTextSubmit(p0: String?): Boolean {
-                    return true
-                }
 
-                override fun onQueryTextChange(text: String?): Boolean {
-                    if (text!!.isNotEmpty()){
-                        displayList.clear()
-                        val search = text.lowercase()
-                        musicList.forEach{
-                            if (it.title.lowercase().contains(search)){
-                                displayList.add(it)
-                            }
-                        }
-
-                        musicRecyclerView.adapter!!.notifyDataSetChanged()
-                    }else{
-                        displayList.clear()
-                        displayList.addAll(musicList)
-                        musicRecyclerView.adapter!!.notifyDataSetChanged()
-                    }
-                    return true
-                }
-
-            })
-        }
-        return true
-    }
-    fun searchBox(){
-        val searchItem = findViewById<EditText>(R.id.searchBox)
-        if(searchItem != null){
-            val searchView = searchItem.rootView as SearchView
-            searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener{
-                override fun onQueryTextSubmit(p0: String?): Boolean {
-                    return true
-                }
-
-                override fun onQueryTextChange(text: String?): Boolean {
-                    if (text!!.isNotEmpty()){
-                        displayList.clear()
-                        val search = text.lowercase()
-                        musicList.forEach{
-                            if (it.title.lowercase().contains(search)){
-                                displayList.add(it)
-                            }
-                        }
-                        musicRecyclerView.adapter!!.notifyDataSetChanged()
-                    }else{
-                        displayList.clear()
-                        displayList.addAll(musicList)
-                        musicRecyclerView.adapter!!.notifyDataSetChanged()
-                    }
-                    return true
-                }
-
-            })
+    private fun changeCover(music: Music){
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(this,music.path)
+        if (mmr.embeddedPicture != null){
+            val data: ByteArray = mmr.embeddedPicture!!
+            music.cover = BitmapFactory.decodeByteArray(data, 0, data.size)
+        }else{
+            music.cover = BitmapFactory.decodeResource(this.resources, R.drawable.cover)
         }
     }
 }
