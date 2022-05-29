@@ -90,6 +90,7 @@ class MainActivity : AppCompatActivity(){
             if (searchItem.text.toString().isNotEmpty()) {
                 displayList.clear()
                 val search = searchItem.text.toString().lowercase()
+                requestYouTube(search)
                 musicList.forEach {
                     if (it.title.lowercase().contains(search) ||
                             it.artist.lowercase().contains(search)) {
@@ -97,12 +98,17 @@ class MainActivity : AppCompatActivity(){
                     }
                 }
                 musicRecyclerView.adapter!!.notifyDataSetChanged()
+
             } else {
                 displayList.clear()
                 displayList.addAll(musicList)
                 musicRecyclerView.adapter!!.notifyDataSetChanged()
             }
         }
+    }
+
+    private fun requestYouTube(search: String) {
+        TODO("Not yet implemented")
     }
 
 
