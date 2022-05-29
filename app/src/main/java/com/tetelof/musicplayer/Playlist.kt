@@ -6,7 +6,7 @@ import android.widget.Toast
 class Playlist
 {
     companion object {
-        private val playlist: MutableList<Music> = mutableListOf()
+        val playlist: MutableList<Music> = mutableListOf()
 
 
         fun nextMusic(atual: Music, context: Context) {

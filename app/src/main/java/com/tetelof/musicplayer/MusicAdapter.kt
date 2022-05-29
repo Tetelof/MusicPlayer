@@ -1,7 +1,7 @@
 package com.tetelof.musicplayer
 
+import android.content.Context
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.media.MediaMetadataRetriever
 import android.view.LayoutInflater
 import android.view.View
@@ -14,7 +14,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MusicAdapter(private val context: MainActivity, private val musicList: MutableList<Music>) :
+class MusicAdapter(private val context: Context, private val musicList: MutableList<Music>) :
     RecyclerView.Adapter<MusicAdapter.MusicViewHolder>() {
 
 

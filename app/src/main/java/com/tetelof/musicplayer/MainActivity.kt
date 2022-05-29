@@ -1,6 +1,7 @@
 package com.tetelof.musicplayer
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
@@ -24,7 +25,6 @@ import androidx.recyclerview.widget.RecyclerView
 class MainActivity : AppCompatActivity(){
 
 
-    private var mMediaPlayer: MediaPlayer? = null
     private lateinit var musicRecyclerView: RecyclerView
     private lateinit var musicList: MutableList<Music>
     private lateinit var adapter: MusicAdapter
@@ -136,15 +136,6 @@ class MainActivity : AppCompatActivity(){
     }
 
 
-    override fun onStop() {
-        super.onStop()
-        if(mMediaPlayer != null){
-            mMediaPlayer!!.release()
-            mMediaPlayer = null
-        }
-    }
-
-
     private fun havePermission(): Boolean {
         val result = ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
         return result == PackageManager.PERMISSION_GRANTED
@@ -172,5 +163,18 @@ class MainActivity : AppCompatActivity(){
         }else{
             music.cover = BitmapFactory.decodeResource(this.resources, R.drawable.cover)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+       if (Music.currentPlaying != null){
+           Music.atualizaInfo(Music.currentPlaying!!,this)
+           if (Music.mediaPlayer != null){
+               if(Music.mediaPlayer!!.isPlaying)
+                   this.playPauseButton.setImageResource(R.drawable.ic_baseline_pause_circle_outline_50)
+               else
+                   this.playPauseButton.setImageResource(R.drawable.ic_baseline_play_circle_outline_50)
+           }
+       }
     }
 }

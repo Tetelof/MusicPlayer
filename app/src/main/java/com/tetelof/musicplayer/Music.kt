@@ -2,7 +2,9 @@ package com.tetelof.musicplayer
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.AudioAttributes
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.net.Uri
 import android.widget.Toast
@@ -18,6 +20,7 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
 
 
         fun playContentUri(music : Music, context: Context){
+            changeCover(music, context)
             this.currentPlaying = music
 
 
@@ -36,12 +39,14 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
                             .build()
                     )
                     prepareAsync()
-                    start()
                 }
                 mediaPlayer!!.setOnPreparedListener{
                     mediaPlayer!!.start()
                     atualizaInfo(music, context)
 //                    Toast.makeText(context, "Abrindo musica", Toast.LENGTH_SHORT).show()
+                }
+                mediaPlayer!!.setOnCompletionListener {
+                    Playlist.nextMusic(music,context)
                 }
 
 
@@ -52,9 +57,7 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
             }catch (e: Exception){
                 Toast.makeText(context, e.message, Toast.LENGTH_SHORT).show()
             }
-            mediaPlayer!!.setOnCompletionListener {
-                Playlist.nextMusic(currentPlaying!!, context)
-            }
+
         }
         fun stopSound() {
             if (mediaPlayer != null) {
@@ -90,6 +93,17 @@ class Music(var title: String, var artist: String, var path: Uri, var cover: Bit
                 context.seekbar.max = mediaPlayer!!.duration
                 context.duracao.text = context.millToMinutes(mediaPlayer!!.duration)
             }catch (e: Exception) {}
+        }
+
+        private fun changeCover(music: Music, context: Context){
+            val mmr = MediaMetadataRetriever()
+            mmr.setDataSource(context,music.path)
+            if (mmr.embeddedPicture != null){
+                val data: ByteArray = mmr.embeddedPicture!!
+                music.cover = BitmapFactory.decodeByteArray(data, 0, data.size)
+            }else{
+                music.cover = BitmapFactory.decodeResource(context.resources, R.drawable.cover)
+            }
         }
 
     }

@@ -1,7 +1,9 @@
 package com.tetelof.musicplayer
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.view.MotionEvent
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
@@ -14,12 +16,15 @@ class Player : AppCompatActivity() {
     lateinit var previousButton: ImageButton
     lateinit var seekbar: SeekBar
     lateinit var duracao: TextView
+    var x1 = 0f
+    var x2 = 0f
 
     private lateinit var runnable: Runnable
     private var handler = Handler()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_player)
+
 
         // timers da musica
         val tempoAtual: TextView = findViewById(R.id.playerTempoAtual)
@@ -37,12 +42,14 @@ class Player : AppCompatActivity() {
 
 
         // atualiza os nomes de artista e da musica e atualiza a imagem de cover
-        musicTitle = findViewById(R.id.playerMusicTitle)
-        musicArtist = findViewById(R.id.playerMusicArtist)
-        musicImage = findViewById(R.id.playerCover)
-        musicTitle.text = Music.currentPlaying!!.title
-        musicArtist.text = Music.currentPlaying!!.artist
-        musicImage.setImageBitmap(Music.currentPlaying!!.cover)
+        if (Music.currentPlaying!= null){
+            musicTitle = findViewById(R.id.playerMusicTitle)
+            musicArtist = findViewById(R.id.playerMusicArtist)
+            musicImage = findViewById(R.id.playerCover)
+            musicTitle.text = Music.currentPlaying!!.title
+            musicArtist.text = Music.currentPlaying!!.artist
+            musicImage.setImageBitmap(Music.currentPlaying!!.cover)
+        }
 
 
         // botao de play/pause
@@ -113,5 +120,19 @@ class Player : AppCompatActivity() {
         return String.format("%02d:%02d",minutes,seconds)
     }
 
-
+    override fun onTouchEvent(touchEvent: MotionEvent): Boolean{
+        var distance = 0f
+        when (touchEvent.action){
+            MotionEvent.ACTION_DOWN ->
+                x1 = touchEvent.x
+            MotionEvent.ACTION_UP ->
+                x2 = touchEvent.x
+        }
+        distance = x1 - x2
+        if (distance > 50){
+            val intent = Intent(this, Playlist_View::class.java)
+            startActivity(intent)
+        }
+        return false
+    }
 }
